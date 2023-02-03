@@ -10,6 +10,9 @@ public class BotService {
     private GameObject bot;
     private PlayerAction playerAction;
     private GameState gameState;
+    //Objek baru "worldCenter buat nandain titik di tengah2 dan supaya nggak keluar"
+    Position centerPosition = new Position(0,0);
+    GameObject worldCenter = new GameObject(null, null, null, null, centerPosition, null);
 
     public BotService() {
         this.playerAction = new PlayerAction();
@@ -36,25 +39,46 @@ public class BotService {
     public void computeNextPlayerAction(PlayerAction playerAction) {
         playerAction.action = PlayerActions.FORWARD;
         playerAction.heading = new Random().nextInt(360);
+        System.out.println("----------");
         if (!gameState.getGameObjects().isEmpty()) 
         {
+            // List yang isinya game Object "FOOD", terurut dg indeks pertama yg distancenya paling kecil
             var foodList = gameState.getGameObjects()
                 .stream().filter(item -> item.getGameObjectType() == ObjectTypes.FOOD)
                 .sorted(Comparator
                         .comparing(item -> getDistanceBetween(bot, item)))
                 .collect(Collectors.toList());
+            //List yang isinya objek "Player", terurut dg indeks pertama yg distancenya paling kecil
             var nearestPlayer = gameState.getPlayerGameObjects()
                 .stream().filter(item -> item.getId() != bot.getId())
                 .sorted(Comparator
                         .comparing(item -> getDistanceBetween(bot, item)))
                 .collect(Collectors.toList());
+            //Kondisi ketika menemui player lain yang sizenya lebih kecil
             if (nearestPlayer.get(0).getSize() < bot.getSize())
             {
                 playerAction.heading = getHeadingBetween(nearestPlayer.get(0));
+                System.out.println("I'll kill You");
             }
-            else if (getDistanceBetween(bot, nearestPlayer.get(0))<10)
+            else if (getDistanceBetween(bot, nearestPlayer.get(0))<30)
             {
-                playerAction.heading = getHeadingBetween(nearestPlayer.get(0)) + 180;
+                //Kondisi ketika sudah di ujung arena
+                if (getDistanceBetween(worldCenter, bot)+1.5*bot.getSize()>gameState.world.getRadius())
+                {
+                    playerAction.heading = getHeadingBetween(worldCenter);
+                    System.out.println("Go to save zone");
+                }
+                else
+                //Kondisi ketika mendekat dg musuh
+                {
+                    playerAction.heading = (getHeadingBetween(nearestPlayer.get(0)) + 180) % 360;
+                    System.out.println("Running away");
+                }
+            }
+            //Ini masih repetisi dg yang diatas, jujur bingung buat nambahin supaya ngga ke repeat
+            else if (getDistanceBetween(worldCenter, bot)+1.5*bot.getSize()>gameState.world.getRadius())
+            {
+                playerAction.heading = getHeadingBetween(worldCenter);
             }
             else
             {
