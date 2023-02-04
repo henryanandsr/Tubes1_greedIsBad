@@ -39,7 +39,6 @@ public class BotService {
     public void computeNextPlayerAction(PlayerAction playerAction) {
         playerAction.action = PlayerActions.FORWARD;
         playerAction.heading = new Random().nextInt(360);
-        System.out.println("----------");
         if (!gameState.getGameObjects().isEmpty()) 
         {
             // List yang isinya game Object "FOOD", terurut dg indeks pertama yg distancenya paling kecil
@@ -54,18 +53,28 @@ public class BotService {
                 .sorted(Comparator
                         .comparing(item -> getDistanceBetween(bot, item)))
                 .collect(Collectors.toList());
+            var nearestGasCloud = gameState.getGameObjects()
+            .stream().filter(item-> item.getGameObjectType() == ObjectTypes.GAS_CLOUD)
+            .sorted(Comparator
+                    .comparing(item->getDistanceBetween(bot,item)))
+                .collect(Collectors.toList());
+            var nearestAsteroid = gameState.getGameObjects()
+            .stream().filter(item->item.getGameObjectType() == ObjectTypes.ASTEROID_FIELD)
+            .sorted(Comparator
+                    .comparing(item->getDistanceBetween(bot, item)))
+                .collect(Collectors.toList());
             //Kondisi ketika menemui player lain yang sizenya lebih kecil
             if (nearestPlayer.get(0).getSize() < bot.getSize())
             {
                 playerAction.heading = getHeadingBetween(nearestPlayer.get(0));
                 System.out.println("I'll kill You");
             }
-            else if (getDistanceBetween(bot, nearestPlayer.get(0))<30)
+            else if (getDistanceBetween(bot, nearestPlayer.get(0)) + nearestPlayer.get(0).getSize() * 1.5 <30)
             {
                 //Kondisi ketika sudah di ujung arena
                 if (getDistanceBetween(worldCenter, bot)+1.5*bot.getSize()>gameState.world.getRadius())
                 {
-                    playerAction.heading = getHeadingBetween(worldCenter);
+                    playerAction.heading = (getHeadingBetween(worldCenter) + 90 ) % 360;
                     System.out.println("Go to save zone");
                 }
                 else
@@ -73,16 +82,30 @@ public class BotService {
                 {
                     playerAction.heading = (getHeadingBetween(nearestPlayer.get(0)) + 180) % 360;
                     System.out.println("Running away");
+                    if (getDistanceBetween(nearestAsteroid.get(0), bot)<30)
+                    {
+                        playerAction.heading += 90 %360;
+                    }
                 }
             }
             //Ini masih repetisi dg yang diatas, jujur bingung buat nambahin supaya ngga ke repeat
             else if (getDistanceBetween(worldCenter, bot)+1.5*bot.getSize()>gameState.world.getRadius())
             {
                 playerAction.heading = getHeadingBetween(worldCenter);
+                System.out.println("Go to save zone");
             }
             else
             {
-                playerAction.heading = getHeadingBetween(foodList.get(0));
+                if (getDistanceBetween(nearestGasCloud.get(0), bot)<10)
+                {
+                    playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+90) %360;
+                    System.out.println("Get out from gas Cloud");
+                }
+                else
+                {
+                    playerAction.heading = getHeadingBetween(foodList.get(0));
+                    System.out.println("Makan bang");
+                }
             }
         }
         this.playerAction = playerAction;
