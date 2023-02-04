@@ -12,8 +12,7 @@ public class BotService {
     private GameState gameState;
     //Objek baru "worldCenter buat nandain titik di tengah2 dan supaya nggak keluar"
     Position centerPosition = new Position(0,0);
-    GameObject worldCenter = new GameObject(null, null, null, null, centerPosition, null);
-
+    GameObject worldCenter = new GameObject(null, null, null, null, centerPosition, null,null,null);
     public BotService() {
         this.playerAction = new PlayerAction();
         this.gameState = new GameState();
@@ -67,6 +66,7 @@ public class BotService {
             if (nearestPlayer.get(0).getSize() < bot.getSize())
             {
                 playerAction.heading = getHeadingBetween(nearestPlayer.get(0));
+                playerAction.action = PlayerActions.FIRETORPEDOES;
                 System.out.println("I'll kill You");
             }
             else if (getDistanceBetween(bot, nearestPlayer.get(0)) + nearestPlayer.get(0).getSize() * 1.5 <30)
@@ -80,6 +80,7 @@ public class BotService {
                 else
                 //Kondisi ketika mendekat dg musuh
                 {
+                    playerAction.action = PlayerActions.FIRETORPEDOES;
                     playerAction.heading = (getHeadingBetween(nearestPlayer.get(0)) + 180) % 360;
                     System.out.println("Running away");
                     if (getDistanceBetween(nearestAsteroid.get(0), bot)<30)
@@ -105,6 +106,7 @@ public class BotService {
                 {
                     playerAction.heading = getHeadingBetween(foodList.get(0));
                     System.out.println("Makan bang");
+                    playerAction.action = PlayerActions.ACTIVATESHIELD;
                 }
             }
         }
@@ -114,7 +116,12 @@ public class BotService {
     public GameState getGameState() {
         return this.gameState;
     }
-
+    public int ResolveNewTarget()
+    {
+        var directionToFood = gameState.getGameObjects().stream().filter(item -> item.getGameObjectType() == ObjectTypes.FOOD).sorted(Comparator.comparing(item -> getDistanceBetween(bot, item))).collect(Collectors.toList());
+        int heading = getHeadingBetween(directionToFood.get(0));
+        return heading;
+    }
     public void setGameState(GameState gameState) {
         this.gameState = gameState;
         updateSelfState();
@@ -140,6 +147,4 @@ public class BotService {
     private int toDegrees(double v) {
         return (int) (v * (180 / Math.PI));
     }
-
-
 }
