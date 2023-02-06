@@ -35,7 +35,7 @@ public class Main {
             System.out.println("Registered with the runner " + id);
 
             Position position = new Position();
-            GameObject bot = new GameObject(id, 10, 20, 0, position, ObjectTypes.PLAYER,5,5,5);
+            GameObject bot = new GameObject(id, 10, 20, 0, position, ObjectTypes.PLAYER,5,5,5,5,5);
             botService.setBot(bot);
         }, UUID.class);
 
@@ -58,7 +58,7 @@ public class Main {
 
         Thread.sleep(1000);
         System.out.println("Registering with the runner...");
-        hubConnection.send("Register", token, "RV2");
+        hubConnection.send("Register", token, "greedIsBad");
 
         //This is a blocking call
         hubConnection.start().subscribe(() -> {

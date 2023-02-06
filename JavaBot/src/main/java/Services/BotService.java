@@ -76,7 +76,7 @@ public class BotService {
                         .comparing(item -> getDistanceBetween(bot,item)))
                     .collect(Collectors.toList());
             var nearestTorpedos = gameState.getGameObjects()
-                .stream().filter(item -> item.getGameObjectType() == ObjectTypes.TORPEDO_SALVO &&  (Math.abs(getHeadingBetween(item) - item.currentHeading + 180) +360 % 360)  < 80)
+                .stream().filter(item -> item.getGameObjectType() == ObjectTypes.TORPEDO_SALVO &&  (Math.abs(getHeadingBetween(item) - item.currentHeading + 180) +360 % 360)  < 60)
                 .sorted(Comparator
                         .comparing(item -> getDistanceBetween(bot,item)))
                     .collect(Collectors.toList());
@@ -108,7 +108,7 @@ public class BotService {
                 //     tempTorpedo = nearestTorpedos.get(0);
                 //     valid = true;
                 // }
-                if (bot.getSize()>26 && getDistanceBetween(nearestTorpedos.get(0), bot) < 200)
+                if (bot.getSize()>26 && getDistanceBetween(nearestTorpedos.get(0), bot) < 4*bot.getSize())
                 {
                     System.out.println("testtt");
                     if (gameState.getWorld().getCurrentTick() - ctick > 20)
@@ -124,7 +124,7 @@ public class BotService {
                     }
                 }
             }
-            else if (getDistanceBetween(bot, nearestPlayer.get(0)) > 30 && bot.getTorpedoSalvo() > 0 && bot.getSize() > 20)
+            else if (getDistanceBetween(bot, nearestPlayer.get(0)) < 4*(bot.getSize()+nearestPlayer.get(0).getSize()) && bot.getTorpedoSalvo() > 0 && bot.getSize() > 30)
             {
                 /*
                 //Kondisi ketika sudah di ujung arena
@@ -137,9 +137,17 @@ public class BotService {
                 //Kondisi ketika mendekat dg musuh
                 {
                     */
+                if (bot.getSize() > 40+nearestPlayer.get(0).getSize()){
                     playerAction.heading = getHeadingBetween(nearestPlayer.get(0));
                     playerAction.action = PlayerActions.FIRETORPEDOES;
                     supernova = true;
+                    // this.playerAction = playerAction;
+                    // playerAction.heading = (getHeadingBetween(nearestPlayer.get(0)) + 180) % 360;
+                    // System.out.println("Running away");
+                }else{
+                    playerAction.heading = getHeadingBetween(nearestPlayer.get(0)) + 540 % 360;
+                    // playerAction.action = PlayerActions.FIRETORPEDOES;
+                    // supernova = true;
                     // this.playerAction = playerAction;
                     // playerAction.heading = (getHeadingBetween(nearestPlayer.get(0)) + 180) % 360;
                     // System.out.println("Running away");
@@ -147,6 +155,7 @@ public class BotService {
                     {
                         playerAction.heading += 90 %360;
                     }
+                }
                 // }
             }
             //Ini masih repetisi dg yang diatas, jujur bingung buat nambahin supaya ngga ke repeat
@@ -174,7 +183,7 @@ public class BotService {
                 else
                 {
                     playerAction.heading = getHeadingBetween(foodList.get(0));
-                    // System.out.println("Food");
+                    System.out.println("FOOOOOOOD");
                 }
             }
             }
