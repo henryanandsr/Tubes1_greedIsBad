@@ -81,6 +81,51 @@ public class BotService {
                         .comparing(item -> getDistanceBetween(bot,item)))
                     .collect(Collectors.toList());
             System.out.println(nearestTorpedos);
+
+
+            if (/*combat =*/true){
+                /*Do Something */
+            }else{
+                if (nearestTorpedos.size() != 0)
+                {
+                    if (bot.getSize()>26 && getDistanceBetween(nearestTorpedos.get(0), bot) < (65+bot.getSize()))
+                    {
+                        System.out.println("testtt");
+                        if (gameState.getWorld().getCurrentTick() - ctick > 20)
+                        {
+                            valid = true;
+                        }
+                        if (valid)
+                        {
+                            playerAction.action = PlayerActions.ACTIVATESHIELD;
+                            System.out.println("SHIELDDDD");
+                            ctick = gameState.getWorld().getCurrentTick();
+                            valid = false;
+                        }
+                    }
+                }
+                if (getDistanceBetween(nearestGasCloud.get(0), bot) < (80+bot.getSize()+nearestGasCloud.get(0).getSize()))
+                {
+                    playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+90) %360;
+                    // System.out.println("Get out from gas Cloud");
+                }
+                else if (getDistanceBetween(superFoodList.get(0),bot)<getDistanceBetween(foodList.get(0), bot))
+                {
+                    playerAction.heading = getHeadingBetween(superFoodList.get(0));
+                    // System.out.println("Superfood");
+                }
+                else
+                {
+                    playerAction.heading = getHeadingBetween(foodList.get(0));
+                    System.out.println("FOOOOOOOD");
+                }
+            }
+
+
+
+
+
+
             //Kondisi ketika menemui player lain yang sizenya lebih kecil
             // System.out.println("PLAYER 1 = " + nearestPlayer.get(0).getId());
             // System.out.println("PLAYER 2 = " + nearestPlayer.get(1).getId());
