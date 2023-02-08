@@ -83,9 +83,13 @@ public class BotService {
             System.out.println(nearestTorpedos);
 
 
-            if (/*combat =*/true){
+            if (/*combat =*/false){
                 /*Do Something */
+                if (/*attack =*/true){
+
+                }
             }else{
+                playerAction.action = PlayerActions.FORWARD;
                 if (nearestTorpedos.size() != 0)
                 {
                     if (bot.getSize()>26 && getDistanceBetween(nearestTorpedos.get(0), bot) < (65+bot.getSize()))
@@ -104,15 +108,21 @@ public class BotService {
                         }
                     }
                 }
-                if (getDistanceBetween(nearestGasCloud.get(0), bot) < (80+bot.getSize()+nearestGasCloud.get(0).getSize()))
+                else if ((getDistanceBetween(worldCenter, bot)+bot.getSize()-30)>gameState.world.getRadius())
                 {
-                    playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+90) %360;
-                    // System.out.println("Get out from gas Cloud");
+                    playerAction.heading = getHeadingBetween(worldCenter);
+                }
+                else if (getDistanceBetween(nearestGasCloud.get(0), bot) < (80+bot.getSize()+nearestGasCloud.get(0).getSize()))
+                {
+                    if (getDistanceBetween(nearestGasCloud.get(0), bot)<=(1+bot.getSize()+nearestGasCloud.get(0).getSize())){
+                        playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+180) %360;
+                    }else{
+                        playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+90) %360;
+                    }
                 }
                 else if (getDistanceBetween(superFoodList.get(0),bot)<getDistanceBetween(foodList.get(0), bot))
                 {
                     playerAction.heading = getHeadingBetween(superFoodList.get(0));
-                    // System.out.println("Superfood");
                 }
                 else
                 {
@@ -120,6 +130,7 @@ public class BotService {
                     System.out.println("FOOOOOOOD");
                 }
             }
+        }
 
 
 
@@ -143,7 +154,7 @@ public class BotService {
             //     playerAction.action = PlayerActions.TELEPORT;
             //     fireTeleport = false;
             // }
-            if (nearestTorpedos.size() != 0)
+/*/            if (nearestTorpedos.size() != 0)
             {
                 // // tId = nearestTorpedos.get(0).getId();
                 // if (!valid)
@@ -181,7 +192,7 @@ public class BotService {
                 else
                 //Kondisi ketika mendekat dg musuh
                 {
-                    */
+                    
                 if (bot.getSize() > 40+nearestPlayer.get(0).getSize()){
                     playerAction.heading = getHeadingBetween(nearestPlayer.get(0));
                     playerAction.action = PlayerActions.FIRETORPEDOES;
@@ -232,8 +243,8 @@ public class BotService {
                 }
             }
             }
-        // }
-        this.playerAction = playerAction;
+        // }*/
+        this.playerAction = playerAction; 
     }
 
     public GameState getGameState() {
