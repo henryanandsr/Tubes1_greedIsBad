@@ -12,6 +12,8 @@ public class BotService {
     private GameObject bot;
     private PlayerAction playerAction;
     private GameState gameState;
+    boolean evade = false;
+    int evadetick = 0;
     //Objek baru "worldCenter buat nandain titik di tengah2 dan supaya nggak keluar"
     Position centerPosition = new Position(0,0);
     GameObject tempTorpedo = new GameObject(null, null, null, null, null, null,null,null,null,null,null);
@@ -80,51 +82,60 @@ public class BotService {
                 .sorted(Comparator
                         .comparing(item -> getDistanceBetween(bot,item)))
                     .collect(Collectors.toList());
-            System.out.println(nearestTorpedos);
-            //Kondisi ketika menemui player lain yang sizenya lebih kecil
-            // System.out.println("PLAYER 1 = " + nearestPlayer.get(0).getId());
-            // System.out.println("PLAYER 2 = " + nearestPlayer.get(1).getId());
-            // System.out.println("PLAYER 3 = " + nearestPlayer.get(2).getId());
-            // if (nearestPlayer.get(0).getSize() < bot.getSize() && getDistanceBetween(nearestPlayer.get(0), bot) < 100)
-            // {
-            //     playerAction.heading = getHeadingBetween(nearestPlayer.get(0));
-            //     System.out.println("I'll kill You");
-            // }
-            // System.out.println(gameState.getWorld().getCurrentTick());
-            // System.out.println("torpedo " + bot.getTorpedoSalvo());
-            // System.out.println("Shield "  + bot.shield);
-            // if (fireTeleport==true)
-            // {
-            //     playerAction.action = PlayerActions.TELEPORT;
-            //     fireTeleport = false;
-            // }
-            if (nearestTorpedos.size() != 0)
-            {
-                // // tId = nearestTorpedos.get(0).getId();
-                // if (!valid)
-                // {
-                //     tTime = gameState.getWorld().getCurrentTick() + 2;
-                //     tDist = getDistanceBetween(nearestTorpedos.get(0), bot);
-                //     tempTorpedo = nearestTorpedos.get(0);
-                //     valid = true;
-                // }
-                if (bot.getSize()>26 && getDistanceBetween(nearestTorpedos.get(0), bot) < 4*bot.getSize())
-                {
-                    System.out.println("testtt");
-                    if (gameState.getWorld().getCurrentTick() - ctick > 20)
-                    {
-                        valid = true;
-                    }
-                    if (valid)
-                    {
-                        playerAction.action = PlayerActions.ACTIVATESHIELD;
-                        System.out.println("SHIELDDDD");
-                        ctick = gameState.getWorld().getCurrentTick();
-                        valid = false;
-                    }
+            GameObject scanMusuh = nearestPlayer.get(0); //musuh terdekat kita (untuk menentukan attack/defense)
+            if (gameState.getWorld().getCurrentTick() != null){
+                if ((gameState.getWorld().getCurrentTick() > evadetick + 5) && evade){
+                    playerAction.action = PlayerActions.STOPAFTERBURNER;
+                    evade = false;
                 }
             }
-            else if (getDistanceBetween(bot, nearestPlayer.get(0)) < 4*(bot.getSize()+nearestPlayer.get(0).getSize()) && bot.getTorpedoSalvo() > 0 && bot.getSize() > 30)
+            else if (getDistanceBetween(bot, scanMusuh) <= 1.5*(bot.getSize() + scanMusuh.getSize())){
+                System.out.println("Combat activated");
+                if (getDistanceBetween(bot, nearestPlayer.get(2)) <= 2*bot.getSize()
+                && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(1)) <= 270 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(1)) >= 90 
+                && getHeadingBetween(nearestPlayer.get(1)) - getHeadingBetween(nearestPlayer.get(2)) <= 270 && getHeadingBetween(nearestPlayer.get(1)) - getHeadingBetween(nearestPlayer.get(2)) >= 90
+                && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(2)) <= 270 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(2)) >= 90
+                ){
+                    System.out.println("Terkepung");
+                    if (bot.fireTeleport > 0){
+                        System.out.println("Firing teleport");
+                        playerAction.heading = getHeadingBetween(worldCenter);
+                        playerAction.action = PlayerActions.FIRETELEPORT;           //terkepung dan teleport maneuver
+                    } else {
+                        System.out.println("Tidak punya teleport");
+                    }
+                } else if (nearestTorpedos.size() != 0){
+                    System.out.println("Torpedo Detected");
+                    if (bot.getSize()>26 && getDistanceBetween(nearestTorpedos.get(0), bot) < 4*bot.getSize() && bot.fireTeleport > 0)
+                    {
+                        System.out.println("Able to shield");
+                        if (gameState.getWorld().getCurrentTick() - ctick > 20) //penanda supaya nyalain shield biar ngga terus2an nembak shield
+                        {
+                            valid = true;
+                        }
+                        if (valid)
+                        {
+                            playerAction.action = PlayerActions.ACTIVATESHIELD;
+                            System.out.println("Shield Engaged!");
+                            ctick = gameState.getWorld().getCurrentTick();
+                            valid = false;
+                        }
+                    } else if (bot.getSize() >=15 && bot.getSize() <= 25 && bot.fireTeleport == 0){
+                            System.out.println("Evasive maneuvers!");
+                            int temp1 = getHeadingBetween(nearestTorpedos.get(0)) - getHeadingBetween(nearestTorpedos.get(1));
+                            playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + (Math.max(Math.abs(temp1),Math.abs(360-temp1))/2);
+                            playerAction.action = PlayerActions.STARTAFTERBURNER;
+                            evadetick = gameState.getWorld().getCurrentTick();
+                            evade = true;
+                    }
+                }
+            } else {
+                System.out.println("Non-Combat");
+                playerAction.action = PlayerActions.FORWARD;
+                playerAction.heading = getHeadingBetween(foodList.get(0));
+            }
+/////////////////////////OLD/////////////////////////////////
+            if (getDistanceBetween(bot, nearestPlayer.get(0)) < 4*(bot.getSize()+nearestPlayer.get(0).getSize()) && bot.getTorpedoSalvo() > 0 && bot.getSize() > 30)
             {
                 /*
                 //Kondisi ketika sudah di ujung arena
