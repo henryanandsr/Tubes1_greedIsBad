@@ -3,6 +3,7 @@ package Services;
 import Enums.*;
 import Models.*;
 
+import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.stream.*;
 
@@ -128,6 +129,25 @@ public class BotService {
                             evadetick = gameState.getWorld().getCurrentTick();
                             evade = true;
                     }
+                } else if (scanMusuh.getSize() > bot.getSize()){
+                    System.out.println("OH SHIT HES BIG");
+                    if (getDistanceBetween(worldCenter, bot)+   bot.getSize()-50>gameState.world.getRadius()){
+                        //ketika dikejar tapi kita ngarah ke world border
+                        System.out.println("OH FCK IM AT THE BORDER");
+                        int tempHeading;
+                        if (getHeadingBetween(nearestPlayer.get(0))>=270 || (getHeadingBetween(nearestPlayer.get(0))>=90 && getHeadingBetween(nearestPlayer.get(0)) < 180))
+                        {
+                            tempHeading = getHeadingBetween(nearestPlayer.get(0))+90;
+                        }else{
+                            tempHeading = getHeadingBetween(nearestPlayer.get(0))-90;
+                        }
+                        playerAction.heading = tempHeading;
+                        playerAction.action = PlayerActions.FORWARD;
+                    } else {
+                        System.out.println("RUNNING");
+                        playerAction.heading = 180 + getHeadingBetween(scanMusuh);
+                        playerAction.action = PlayerActions.FORWARD;
+                    } //buat afterburner + navigasi gas cloud asteroid!
                 }
             } else {
                 System.out.println("Non-Combat");
