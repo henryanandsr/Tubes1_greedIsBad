@@ -97,6 +97,7 @@ public class BotService {
 
 
                     if (getDistanceBetween(bot, nearestPlayer.get(0)) < (7*bot.getSize()+nearestPlayer.get(0).getSize())){
+                        System.out.println("COMBAT");
                         if(alrdFire && gameState.getWorld().getCurrentTick()>getTime)
                         {
 
@@ -107,6 +108,7 @@ public class BotService {
                         }
                         else if ((gameState.getWorld().getCurrentTick() > evadetick + 5) && evade)
                         {
+                            System.out.println("STOP AFTERBURNER");
                             playerAction.action = PlayerActions.STOPAFTERBURNER;
                             evade = false;
                         }
@@ -117,7 +119,7 @@ public class BotService {
                         //     //kurang defense disini
                         // }
                         
-                        else if (getDistanceBetween(bot, scanMusuh) <= 4*(bot.getSize() + scanMusuh.getSize()))
+                        else if (getDistanceBetween(bot, scanMusuh) <= 7*(bot.getSize() + scanMusuh.getSize()))
                         {
                             System.out.println("Combat activated, defaulting to defense mode");
                             if (getDistanceBetween(bot, nearestPlayer.get(2)) <= 2*bot.getSize()
@@ -131,6 +133,7 @@ public class BotService {
                                     playerAction.heading = getHeadingBetween(worldCenter);
                                     playerAction.action = PlayerActions.FIRETELEPORT;           //terkepung dan teleport maneuver
                                 } else {
+                                    System.out.println("GA PUNYA TELEPORT, TEMBAAK");
                                     playerAction.heading = getHeadingBetween(scanMusuh);
                                     playerAction.action = PlayerActions.FIRETORPEDOES;
                                 }
@@ -201,32 +204,34 @@ public class BotService {
                                     getTime = (getDistanceBetween(nearestPlayer.get(0), bot)-bot.getSize() - nearestPlayer.get(0).getSize())/20 + gameState.getWorld().getCurrentTick();
                                     System.out.println("fire tele");
                                 }
-                                else if (scanMusuh.getSize() < bot.getSize()){
+                                else if (bot.torpedoSalvo > 0){
                                     System.out.println("Enemy is smaller, in pursuit");
-                                    playerAction.heading = getHeadingBetween(scanMusuh);
                                     playerAction.heading = getHeadingBetween(scanMusuh);
                                     playerAction.action = PlayerActions.FIRETORPEDOES;
                                     //afterburner pursue? teleport jump?
-                                } else if (scanMusuh.getSize() == bot.getSize()){
-                                    System.out.println("Enemy is equal size, firing torpedo");
-                                    playerAction.heading = getHeadingBetween(scanMusuh);
-                                    playerAction.action = PlayerActions.FIRETORPEDOES;
-                                    //nembak torpedo lalu gerak ke samping
+                                // } else if (scanMusuh.getSize() == bot.getSize()){
+                                //     System.out.println("Enemy is equal size, firing torpedo");
+                                //     playerAction.heading = getHeadingBetween(scanMusuh);
+                                //     playerAction.action = PlayerActions.FIRETORPEDOES;
+                                //     //nembak torpedo lalu gerak ke samping
                                 }else{
-                                    System.out.println("MASUK IDLE MODE");
-                                    idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);
+                                    System.out.println("KEJAR");
+                                    playerAction.heading = getHeadingBetween(scanMusuh);
+                                    playerAction.action = PlayerActions.FORWARD;
                                 }
                             }else
                             {
-                            System.out.println("MASUK IDLE MODE");
+                            System.out.println("MASUK IDLE MODE1");
                             idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);
                             }
                         }
-                        System.out.println("MASUK IDLE MODE");
-                        idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);          
+                        else{
+                            System.out.println("MASUK IDLE MODE2");
+                            idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);
+                        }          
                     } 
                     else{
-                        System.out.println("MASUK IDLE MODE");
+                        System.out.println("MASUK IDLE MODE3");
                         idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);
                     }   
                 }
