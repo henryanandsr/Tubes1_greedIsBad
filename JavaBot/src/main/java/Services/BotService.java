@@ -169,7 +169,12 @@ public class BotService {
                             } 
                             else if (scanMusuh.getSize() > bot.getSize()){
                                 System.out.println("OH SHIT HES BIG");
-                                if (getDistanceBetween(worldCenter, bot)+   bot.getSize()-50>gameState.world.getRadius())
+                                if (bot.torpedoSalvo > 0){
+                                    System.out.println("Enemy is bigger, shoot anyway");
+                                    playerAction.heading = getHeadingBetween(scanMusuh);
+                                    playerAction.action = PlayerActions.FIRETORPEDOES;
+                                }
+                                else if (getDistanceBetween(worldCenter, bot) + bot.getSize()+50>gameState.world.getRadius())
                                 {
                                     //ketika dikejar tapi kita ngarah ke world border
                                     System.out.println("OH FCK IM AT THE BORDER");
@@ -184,12 +189,35 @@ public class BotService {
                                     playerAction.heading = tempHeading;
                                     playerAction.action = PlayerActions.FORWARD;
                                 } 
-                                else 
+                                else if (getDistanceBetween(bot, scanMusuh) < 5*bot.getSize()+scanMusuh.getSize())
                                 {
                                     System.out.println("RUNNING");
-                                    playerAction.heading = 180 + getHeadingBetween(scanMusuh);
                                     playerAction.action = PlayerActions.FORWARD;
-                                    //buat afterburner + navigasi gas cloud asteroid! (dibikinin bintang?)
+                                    playerAction.heading = getHeadingBetween(nearestPlayer.get(0)) + 540 % 360;
+                                    if (getDistanceBetween(worldCenter, bot)+2*bot.getSize()>gameState.world.getRadius()){
+                                        int tempHeading;
+                                        if (getHeadingBetween(nearestPlayer.get(0))>=270 || (getHeadingBetween(nearestPlayer.get(0))>=90 && getHeadingBetween(nearestPlayer.get(0)) < 180))
+                                        {
+                                            tempHeading = getHeadingBetween(nearestPlayer.get(0)) + 90 % 360;
+                                        }else{
+                                            tempHeading = getHeadingBetween(nearestPlayer.get(0)) - 90 % 360;
+                                        }
+                                        playerAction.heading = tempHeading;
+                                        playerAction.action = PlayerActions.FORWARD;
+                                    }
+                                    
+                                    else if (getDistanceBetween(nearestGasCloud.get(0), bot) < (bot.getSize()+nearestGasCloud.get(0).getSize()+60))
+                                    {
+                                        playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+90) %360;
+                                    }
+                                    else if (getDistanceBetween(nearestAsteroid.get(0), bot)<30+bot.getSize()+nearestAsteroid.get(0).getSize())
+                                    {
+                                        playerAction.heading += 90 %360;
+                                    }
+                                }
+                                else{
+                                    System.out.println("MASUK IDLE MODE4");
+                                    idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);
                                 } 
                             } 
                             else if (scanMusuh.getSize()<=bot.getSize())
@@ -201,7 +229,7 @@ public class BotService {
                                     playerAction.action = PlayerActions.FIRETELEPORT;
                                     alrdFire = true;
                                     fireTele = false;
-                                    getTime = (getDistanceBetween(nearestPlayer.get(0), bot)-bot.getSize() - nearestPlayer.get(0).getSize())/20 + gameState.getWorld().getCurrentTick();
+                                    getTime = (getDistanceBetween(nearestPlayer.get(0), bot)-bot.getSize() - nearestPlayer.get(0).getSize() + 0.3*bot.getSize())/20 + gameState.getWorld().getCurrentTick();
                                     System.out.println("fire tele");
                                 }
                                 else if (bot.torpedoSalvo > 0){
