@@ -7,6 +7,8 @@ import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.stream.*;
 
+import org.w3c.dom.html.HTMLHeadingElement;
+
 public class BotService {
     boolean valid = true;
     int ctick = 0;
@@ -91,13 +93,13 @@ public class BotService {
                 }
             }
             else if (getDistanceBetween(bot, scanMusuh) <= 1.5*(bot.getSize() + scanMusuh.getSize())){
-                System.out.println("Combat activated");
+                System.out.println("Combat activated, defaulting to defense mode");
                 if (getDistanceBetween(bot, nearestPlayer.get(2)) <= 2*bot.getSize()
                 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(1)) <= 270 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(1)) >= 90 
                 && getHeadingBetween(nearestPlayer.get(1)) - getHeadingBetween(nearestPlayer.get(2)) <= 270 && getHeadingBetween(nearestPlayer.get(1)) - getHeadingBetween(nearestPlayer.get(2)) >= 90
                 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(2)) <= 270 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(2)) >= 90
                 ){
-                    System.out.println("Terkepung");
+                    System.out.println("Terkepung!");
                     if (bot.fireTeleport > 0){
                         System.out.println("Firing teleport");
                         playerAction.heading = getHeadingBetween(worldCenter);
@@ -147,12 +149,26 @@ public class BotService {
                         System.out.println("RUNNING");
                         playerAction.heading = 180 + getHeadingBetween(scanMusuh);
                         playerAction.action = PlayerActions.FORWARD;
-                    } //buat afterburner + navigasi gas cloud asteroid!
+                        //buat afterburner + navigasi gas cloud asteroid! (dibikinin bintang?)
+                    } 
+                } else if (scanMusuh.getSize()<=bot.getSize()){
+                    System.out.println("Attack mode");
+                    if (scanMusuh.getSize() < bot.getSize()){
+                        System.out.println("Enemy is smaller, in pursuit");
+                        playerAction.heading = getHeadingBetween(scanMusuh);
+                        playerAction.action = PlayerActions.FORWARD;
+                        //afterburner pursue? teleport jump?
+                    } else if (scanMusuh.getSize() == bot.getSize()){
+                        System.out.println("Enemy is equal size, firing torpedo");
+                        playerAction.heading = getHeadingBetween(scanMusuh);
+                        playerAction.action = PlayerActions.FIRETORPEDOES;
+                        //nembak torpedo lalu gerak ke samping
+                    }
                 }
             } else {
                 System.out.println("Non-Combat");
-                playerAction.action = PlayerActions.FORWARD;
                 playerAction.heading = getHeadingBetween(foodList.get(0));
+                playerAction.action = PlayerActions.FORWARD;
             }
 /////////////////////////OLD/////////////////////////////////
             if (getDistanceBetween(bot, nearestPlayer.get(0)) < 4*(bot.getSize()+nearestPlayer.get(0).getSize()) && bot.getTorpedoSalvo() > 0 && bot.getSize() > 30)
@@ -225,9 +241,12 @@ public class BotService {
     public GameState getGameState() {
         return this.gameState;
     }
+    //fungsi ini cuman dipanggil sekali?
     public int ResolveNewTarget()
     {
-        var directionToFood = gameState.getGameObjects().stream().filter(item -> item.getGameObjectType() == ObjectTypes.FOOD).sorted(Comparator.comparing(item -> getDistanceBetween(bot, item))).collect(Collectors.toList());
+        var directionToFood = gameState.getGameObjects()
+            .stream().filter(item -> item.getGameObjectType() == ObjectTypes.FOOD)
+            .sorted(Comparator.comparing(item -> getDistanceBetween(bot, item))).collect(Collectors.toList());
         int heading = getHeadingBetween(directionToFood.get(0));
         return heading;
     }
