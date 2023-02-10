@@ -39,7 +39,7 @@ public class BotService {
         this.playerAction = playerAction;
     }
 
-    public void computeNextPlayerAction(PlayerAction playerAction, abc) {
+    public void computeNextPlayerAction(PlayerAction playerAction) {
         if (gameState.getWorld().getCurrentTick()!=null){
             if (gameState.getWorld().getCurrentTick()!=wt){
                 System.out.println(gameState.getWorld().getCurrentTick());
