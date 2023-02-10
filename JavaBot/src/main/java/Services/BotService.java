@@ -156,43 +156,6 @@ public class BotService {
                     }else{
                         System.out.println("MASUK IDLE MODE");
                         idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);
-                        // System.out.println("MASUK IDLE MODE");
-                        // if (nearestTorpedos.size() != 0){
-                        //     // System.out.println("MASUK SHIELD IDLE MODE");
-                        //     if (bot.getSize()>26 && (getDistanceBetween(nearestTorpedos.get(0), bot) < (85+bot.getSize()))){
-                        //         // System.out.println("testtt");
-                        //         if (gameState.getWorld().getCurrentTick() - ctick > 20){
-                        //             valid = true;
-                        //         }
-                        //         if (valid && bot.shield > 0){
-                        //             playerAction.action = PlayerActions.ACTIVATESHIELD;
-                        //             playerAction.heading = getHeadingBetween(worldCenter);
-                        //             // System.out.println("SHIELDDDD");
-                        //             ctick = gameState.getWorld().getCurrentTick();
-                        //             valid = false;
-                        //         }
-                        //         // else{
-                        //         //     playerAction.action = PlayerActions.STARTAFTERBURNER;
-                        //         //     playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + 450 % 360;
-                        //         // }
-                        //     }
-                        // }
-                        // else if (getDistanceBetween(worldCenter, bot)+2.5*bot.getSize()>gameState.world.getRadius()){
-                        //     playerAction.heading = getHeadingBetween(worldCenter);
-                        // }
-                        // else if (getDistanceBetween(nearestGasCloud.get(0), bot) < (80+bot.getSize()+nearestGasCloud.get(0).getSize())){
-                        //     if (getDistanceBetween(nearestGasCloud.get(0), bot)<=(1+bot.getSize()+nearestGasCloud.get(0).getSize())){
-                        //         playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+180) %360;
-                        //     }else{
-                        //         playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+90) %360;
-                        //     }
-                        // }
-                        // else if (getDistanceBetween(superFoodList.get(0),bot)<getDistanceBetween(foodList.get(0), bot)){
-                        //     playerAction.heading = getHeadingBetween(superFoodList.get(0));
-                        // }
-                        // else{
-                        //     playerAction.heading = getHeadingBetween(foodList.get(0));
-                        // }
                     }   
                 }
                 wt = gameState.getWorld().getCurrentTick();
