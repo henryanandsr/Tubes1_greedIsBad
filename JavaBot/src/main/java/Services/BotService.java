@@ -53,6 +53,10 @@ public class BotService {
         if (gameState.getWorld().getCurrentTick()!=null){
             if (gameState.getWorld().getCurrentTick()!=wt){
                 System.out.println(gameState.getWorld().getCurrentTick());
+                if(bot.getSize()>26 && bot.shield>0)
+                {
+                    System.out.println("BS SHIELD");
+                }
                 playerAction.action = PlayerActions.FORWARD;
                 playerAction.heading = new Random().nextInt(360);
                 boolean fireTeleport = false;
@@ -95,7 +99,6 @@ public class BotService {
                             .collect(Collectors.toList());
                     GameObject scanMusuh = nearestPlayer.get(0); //musuh terdekat kita (untuk menentukan attack/defense)
 
-
                     if (getDistanceBetween(bot, nearestPlayer.get(0)) < (7*bot.getSize()+nearestPlayer.get(0).getSize())){
                         System.out.println("COMBAT");
                         if(alrdFire && gameState.getWorld().getCurrentTick()>getTime)
@@ -122,22 +125,26 @@ public class BotService {
                         else if (getDistanceBetween(bot, scanMusuh) <= 7*(bot.getSize() + scanMusuh.getSize()))
                         {
                             System.out.println("Combat activated, defaulting to defense mode");
-                            if (getDistanceBetween(bot, nearestPlayer.get(2)) <= 2*bot.getSize()
-                            && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(1)) <= 270 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(1)) >= 90 
-                            && getHeadingBetween(nearestPlayer.get(1)) - getHeadingBetween(nearestPlayer.get(2)) <= 270 && getHeadingBetween(nearestPlayer.get(1)) - getHeadingBetween(nearestPlayer.get(2)) >= 90
-                            && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(2)) <= 270 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(2)) >= 90
-                            ){
-                                System.out.println("Terkepung!");
-                                if (bot.fireTeleport > 0){
-                                    System.out.println("Firing teleport");
-                                    playerAction.heading = getHeadingBetween(worldCenter);
-                                    playerAction.action = PlayerActions.FIRETELEPORT;           //terkepung dan teleport maneuver
-                                } else {
-                                    System.out.println("GA PUNYA TELEPORT, TEMBAAK");
-                                    playerAction.heading = getHeadingBetween(scanMusuh);
-                                    playerAction.action = PlayerActions.FIRETORPEDOES;
+                            if (nearestPlayer.size()>3)
+                            {
+                                if (getDistanceBetween(bot, nearestPlayer.get(2)) <= 2*bot.getSize()
+                                && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(1)) <= 270 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(1)) >= 90 
+                                && getHeadingBetween(nearestPlayer.get(1)) - getHeadingBetween(nearestPlayer.get(2)) <= 270 && getHeadingBetween(nearestPlayer.get(1)) - getHeadingBetween(nearestPlayer.get(2)) >= 90
+                                && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(2)) <= 270 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(2)) >= 90
+                                ){
+                                    System.out.println("Terkepung!");
+                                    if (bot.fireTeleport > 0){
+                                        System.out.println("Firing teleport");
+                                        playerAction.heading = getHeadingBetween(worldCenter);
+                                        playerAction.action = PlayerActions.FIRETELEPORT;           //terkepung dan teleport maneuver
+                                    } else {
+                                        System.out.println("GA PUNYA TELEPORT, TEMBAAK");
+                                        playerAction.heading = getHeadingBetween(scanMusuh);
+                                        playerAction.action = PlayerActions.FIRETORPEDOES;
+                                    }
                                 }
-                            } else if (nearestTorpedos.size() != 0){
+                            } 
+                            else if (nearestTorpedos.size() != 0){
                                 System.out.println("Torpedo Detected");
                                 if (bot.getSize()>26 && getDistanceBetween(nearestTorpedos.get(0), bot) < 4*bot.getSize() && bot.fireTeleport > 0)
                                 {
@@ -160,11 +167,13 @@ public class BotService {
                                         playerAction.action = PlayerActions.STARTAFTERBURNER;
                                         evadetick = gameState.getWorld().getCurrentTick();
                                         evade = true;
-                                }else{
+                                }else if(nearestTorpedos.size()>1){
                                     System.out.println("Evasive maneuvers! -Tanpa afterburner");
                                     int temp1 = getHeadingBetween(nearestTorpedos.get(0)) - getHeadingBetween(nearestTorpedos.get(1));
-                                    playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + (Math.max(Math.abs(temp1),Math.abs(360-temp1))/2);
-                                        
+                                    playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + (Math.max(Math.abs(temp1),Math.abs(360-temp1))/2);     
+                                }else{
+                                    System.out.println("Evasive maneuvers! -Tanpa afterburner 2");
+                                    playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + 90;
                                 }
                             } 
                             else if (scanMusuh.getSize() > bot.getSize()){
@@ -177,6 +186,8 @@ public class BotService {
                                 else if (getDistanceBetween(worldCenter, bot) + bot.getSize()+50>gameState.world.getRadius())
                                 {
                                     //ketika dikejar tapi kita ngarah ke world border
+                                    //INI MASIH PR
+                                    //KETIKA ADA BORDER DAN MUSUH BESAR MAKA AKAN GERAK KIRI KANAN
                                     System.out.println("OH FCK IM AT THE BORDER");
                                     int tempHeading;
                                     if (getHeadingBetween(nearestPlayer.get(0))>=270 || (getHeadingBetween(nearestPlayer.get(0))>=90 && getHeadingBetween(nearestPlayer.get(0)) < 180))
@@ -510,6 +521,27 @@ public class BotService {
                     }
                 }else{
                     playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + 450 % 360;
+                }
+            }
+        }
+        else if(getDistanceBetween(worldCenter, bot)+2.5*bot.getSize()>gameState.world.getRadius() && getDistanceBetween(nearestGasCloud.get(0), bot) < (80+bot.getSize()+nearestGasCloud.get(0).getSize()))
+        {
+            //HARUS DIBENERIN KALAU SEMPAT
+            if (bot.getSize()>40 && bot.fireTeleport>0)
+            {
+                playerAction.heading = getHeadingBetween(worldCenter);
+                playerAction.action = PlayerActions.FIRETELEPORT;
+                alrdFire = true;
+            }
+            else
+            {
+                if(getHeadingBetween(nearestGasCloud.get(0))>=270 || getHeadingBetween(nearestGasCloud.get(0))>=90 && getHeadingBetween(nearestGasCloud.get(0))<=180)
+                {
+                    playerAction.heading = getHeadingBetween(nearestGasCloud.get(0))+90;
+                }
+                else
+                {
+                    playerAction.heading = getHeadingBetween(nearestGasCloud.get(0))+90;
                 }
             }
         }
