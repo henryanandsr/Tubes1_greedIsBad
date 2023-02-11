@@ -125,7 +125,7 @@ public class BotService {
                             } 
                             else if (nearestTorpedos.size() != 0){
                                 System.out.println("Torpedo Detected");
-                                if (bot.getSize()>26 && getDistanceBetween(nearestTorpedos.get(0), bot) < 4*bot.getSize() && bot.fireTeleport > 0)
+                                if (bot.getSize()>26 && getDistanceBetween(nearestTorpedos.get(0), bot) < 65+bot.getSize() && bot.shield > 0)
                                 {
                                     System.out.println("Able to shield");
                                     if (gameState.getWorld().getCurrentTick() - ctick > 20) //penanda supaya nyalain shield biar ngga terus2an nembak shield
@@ -296,6 +296,8 @@ public class BotService {
                         valid = false;
                     }else{
                         playerAction.action = PlayerActions.STARTAFTERBURNER;
+                        evade = true;
+                        evadetick = gameState.getWorld().getCurrentTick();
                         playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + 450 % 360;    
                     }
                 }else{
