@@ -105,7 +105,7 @@ public class BotService {
                             evade = false;
                         }
                         
-                        else if (getDistanceBetween(bot, scanMusuh) <= 7*(bot.getSize() + scanMusuh.getSize()))
+                        else if (getDistanceBetween(bot, scanMusuh) <= 4*(bot.getSize()) + scanMusuh.getSize())
                         {
                             System.out.println("Combat activated, defaulting to defense mode");
                             if (Terkepung)
