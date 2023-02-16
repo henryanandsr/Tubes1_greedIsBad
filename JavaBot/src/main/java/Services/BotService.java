@@ -162,7 +162,7 @@ public class BotService {
                                     playerAction.heading = getHeadingBetween(scanMusuh);
                                     playerAction.action = PlayerActions.FIRETORPEDOES;
                                 }
-                                else if (getDistanceBetween(bot, scanMusuh) < 5*bot.getSize()+scanMusuh.getSize())
+                                else if (getDistanceBetween(bot, scanMusuh) < 4*bot.getSize()+scanMusuh.getSize())
                                 {
                                     System.out.println("RUNNING");
                                     playerAction.action = PlayerActions.FORWARD;
@@ -206,7 +206,7 @@ public class BotService {
                                     getTime = (getDistanceBetween(nearestPlayer.get(0), bot)-bot.getSize() - nearestPlayer.get(0).getSize() + 0.3*bot.getSize())/20 + gameState.getWorld().getCurrentTick();
                                     System.out.println("fire tele");
                                 }
-                                else if (bot.torpedoSalvo > 0){
+                                else if (bot.torpedoSalvo > 0 && bot.getSize()>26){
                                     System.out.println("fire torpedo");
                                     playerAction.heading = getHeadingBetween(scanMusuh);
                                     playerAction.action = PlayerActions.FIRETORPEDOES;
