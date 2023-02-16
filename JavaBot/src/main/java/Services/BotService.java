@@ -105,7 +105,7 @@ public class BotService {
                             evade = false;
                         }
                         
-                        else if (getDistanceBetween(bot, scanMusuh) <= 4*(bot.getSize()) + scanMusuh.getSize())
+                        else if (getDistanceBetween(bot, scanMusuh) <= 7*bot.getSize() + scanMusuh.getSize())
                         {
                             System.out.println("Combat activated, defaulting to defense mode");
                             if (Terkepung)
@@ -253,7 +253,7 @@ public class BotService {
     public boolean terkepung (List<GameObject> nearestPlayer, GameObject bot, GameObject scanMusuh){
         if (nearestPlayer.size()>3)
         {
-            if (getDistanceBetween(bot, nearestPlayer.get(2)) <= 2*bot.getSize()
+            if (getDistanceBetween(bot, nearestPlayer.get(2)) <= 4*bot.getSize()
             && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(1)) <= 270 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(1)) >= 90 
             && getHeadingBetween(nearestPlayer.get(1)) - getHeadingBetween(nearestPlayer.get(2)) <= 270 && getHeadingBetween(nearestPlayer.get(1)) - getHeadingBetween(nearestPlayer.get(2)) >= 90
             && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(2)) <= 270 && getHeadingBetween(scanMusuh) - getHeadingBetween(nearestPlayer.get(2)) >= 90)
