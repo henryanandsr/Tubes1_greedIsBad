@@ -238,7 +238,6 @@ public class BotService {
                                 }
                                 else if (scanMusuh != null &&getDistanceBetween(bot, scanMusuh) < 2*bot.getSize()+scanMusuh.getSize() && bot.getSize()>25)
                                 {
-                                    System.out.println("CACAT");
                                     System.out.println("RUNNING");
                                     playerAction.action = PlayerActions.STARTAFTERBURNER;
                                     playerAction.heading = getHeadingBetween(nearestPlayer.get(0)) + 540 % 360;
