@@ -54,6 +54,10 @@ pause
 │       greedIsBad.pdf
 │       
 │
-└───src
+└───src/main/java/
+        Enums
+        Model
+        out
+        Services
         main.java
 ```
