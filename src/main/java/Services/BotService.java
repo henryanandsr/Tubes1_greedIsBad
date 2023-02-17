@@ -260,7 +260,12 @@ public class BotService {
                                     
                                     else if (nearestGasCloud.size() != 0 && getDistanceBetween(nearestGasCloud.get(0), bot) < (bot.getSize()+nearestGasCloud.get(0).getSize()+60))
                                     {
-                                        playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+90) %360;
+                                        if (getHeadingBetween(nearestGasCloud.get(0))>=270 || (getHeadingBetween(nearestGasCloud.get(0))>=90 && getHeadingBetween(nearestGasCloud.get(0)) < 180))
+                                        {
+                                            playerAction.heading = getHeadingBetween(nearestGasCloud.get(0)) + 135 % 360;
+                                        }else{
+                                            playerAction.heading = getHeadingBetween(nearestGasCloud.get(0)) - 135 % 360;
+                                        }
                                     }
                                     else if (nearestAsteroid.size() != 0 && getDistanceBetween(nearestAsteroid.get(0), bot)<30+bot.getSize()+nearestAsteroid.get(0).getSize())
                                     {
@@ -287,7 +292,12 @@ public class BotService {
                                     
                                     else if (nearestGasCloud.size() != 0 && getDistanceBetween(nearestGasCloud.get(0), bot) < (bot.getSize()+nearestGasCloud.get(0).getSize()+60))
                                     {
-                                        playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+135) %360;
+                                        if (getHeadingBetween(nearestGasCloud.get(0))>=270 || (getHeadingBetween(nearestGasCloud.get(0))>=90 && getHeadingBetween(nearestGasCloud.get(0)) < 180))
+                                        {
+                                            playerAction.heading = getHeadingBetween(nearestGasCloud.get(0)) + 135 % 360;
+                                        }else{
+                                            playerAction.heading = getHeadingBetween(nearestGasCloud.get(0)) - 135 % 360;
+                                        }
                                     }
                                     else if (nearestAsteroid.size() != 0 && getDistanceBetween(nearestAsteroid.get(0), bot)<30+bot.getSize()+nearestAsteroid.get(0).getSize())
                                     {
