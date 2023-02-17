@@ -10,14 +10,12 @@ public class GameObject {
   public Integer currentHeading;
   public Position position;
   public ObjectTypes gameObjectType;
+  public Integer effects;
   public Integer torpedoSalvo;
-  public Integer shield;
-  public Integer afterBurner;
+  public Integer superNovaAvailable; 
   public Integer fireTeleport;
-  public Integer teleport;
-  public Integer fireSupernova;
-
-  public GameObject(UUID id, Integer size, Integer speed, Integer currentHeading, Position position, ObjectTypes gameObjectType, Integer torpedoSalvo, Integer Shield, Integer afterBurner, Integer fireTeleport, Integer teleport) {
+  public Integer shield;
+  public GameObject(UUID id, Integer size, Integer speed, Integer currentHeading, Position position, ObjectTypes gameObjectType,Integer effects, Integer torpedoSalvo,Integer supernova, Integer fireTeleport, Integer Shield) {
     this.id = id;
     this.size = size;
     this.speed = speed;
@@ -25,10 +23,9 @@ public class GameObject {
     this.position = position;
     this.gameObjectType = gameObjectType;
     this.torpedoSalvo = torpedoSalvo;
+    this.superNovaAvailable = supernova;
     this.shield = Shield;
-    this.afterBurner = afterBurner;
     this.fireTeleport = fireTeleport;
-    this.teleport = teleport;
   }
 
   public UUID getId() {

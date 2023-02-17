@@ -21,6 +21,9 @@ public class BotService {
     int ctick = 0; // turn off shield
     int wt = -1; //1 tick - 1 action
     int evadetick = 0; //turn off afterburner
+    GameObject biggestPlayer;
+    int detonatetick=0;
+    boolean alrdFireSupernova = false;
     //Objek baru "worldCenter buat nandain titik di tengah2 dan supaya nggak keluar"
     Position centerPosition = new Position(0,0);
     GameObject teleTarget;
@@ -82,6 +85,20 @@ public class BotService {
                         .sorted(Comparator
                                 .comparing(item -> getDistanceBetween(bot,item)))
                             .collect(Collectors.toList());
+                    var supernova_list = gameState.getGameObjects()
+                        .stream().filter(item -> item.getGameObjectType() == ObjectTypes.SUPERNOVA_PICKUP)
+                        .sorted(Comparator 
+                                .comparing(item ->getDistanceBetween(item, bot)))
+                            .collect(Collectors.toList());
+                    int a = 5;
+                    for (int i = 0 ; i<nearestPlayer.size();i++)
+                    {
+                        if (a<nearestPlayer.get(0).getSize())
+                        {
+                            a=nearestPlayer.get(0).getSize();
+                            biggestPlayer = nearestPlayer.get(i);
+                        }
+                    }
                     // var nearestTorpedos = gameState.getGameObjects()
                     //     .stream().filter(item -> item.getGameObjectType() == ObjectTypes.TORPEDO_SALVO)
                     //     .sorted(Comparator
@@ -99,18 +116,17 @@ public class BotService {
                     System.out.println("---------------------------------------------------------");
                     System.out.println("Torpedo Count : " + bot.getTorpedoSalvo());
                     System.out.println("Shield Count : " + bot.shield);
-                    System.out.println("Teleport Count : " + bot.teleport);
+                    System.out.println("Teleport Count : " + bot.fireTeleport);
                     System.out.println("Current Radius : " + curRad);
                     System.out.println("Current Size : " + bot.getSize());
                     System.out.println("Current Tick : " + (gameState.getWorld().getCurrentTick()));
                     System.out.println("---------------------------------------------------------");
                     System.out.println("\n");
-
                     if (gameState.getWorld().getCurrentTick() - ctick > 20) //penanda supaya nyalain shield biar ngga terus2an nembak shield
                     {
                         valid = true;
                     }
-                    if (getDistanceBetween(bot, nearestPlayer.get(0)) < (0.2*curRad+bot.getSize()+nearestPlayer.get(0).getSize())){
+                    if (getDistanceBetween(bot, nearestPlayer.get(0)) < (curRad+bot.getSize()+nearestPlayer.get(0).getSize())){
                         System.out.println("COMBAT");
                         if(alrdFire && gameState.getWorld().getCurrentTick()>getTime && teleTarget != null)
                         {
@@ -143,7 +159,23 @@ public class BotService {
                             playerAction.action = PlayerActions.STOPAFTERBURNER;
                             evade = false;
                         }
-                        
+                        else if (alrdFireSupernova && detonatetick == gameState.getWorld().getCurrentTick())
+                        {
+                            playerAction.action = PlayerActions.DETONATESUPERNOVA;
+                            alrdFireSupernova = false;
+                        }
+                        else if (bot.superNovaAvailable==1)
+                        {
+                            playerAction.heading = getHeadingBetween(biggestPlayer);
+                            playerAction.action = PlayerActions.FIRESUPERNOVA;
+                            detonatetick = gameState.getWorld().getCurrentTick() + (int)(getDistanceBetween(biggestPlayer, bot))/20;
+                            alrdFireSupernova = true;
+                        }
+                        else if(supernova_list.size()!=0 && getDistanceBetween(supernova_list.get(0),bot)<50)
+                        {
+                            playerAction.heading = getHeadingBetween(supernova_list.get(0));
+                            playerAction.action = PlayerActions.FORWARD;
+                        }
                         else if (scanMusuh != null && getDistanceBetween(bot, scanMusuh) <= 7*bot.getSize() + scanMusuh.getSize())
                         {
                             System.out.println("Combat activated, defaulting to defense mode");
@@ -265,7 +297,7 @@ public class BotService {
                                 }
                                 else{
                                     System.out.println("MASUK IDLE MODE4");
-                                    idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer);
+                                    idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer,supernova_list);
                                 } 
                             } 
                             else if (scanMusuh != null && scanMusuh.getSize()<=bot.getSize())
@@ -293,17 +325,17 @@ public class BotService {
                             }else
                             {
                             System.out.println("MASUK IDLE MODE1");
-                            idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer);
+                            idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer,supernova_list);
                             }
                         }
                         else{
                             System.out.println("MASUK IDLE MODE2");
-                            idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer);
+                            idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer,supernova_list);
                         }          
                     } 
                     else{
                         System.out.println("MASUK IDLE MODE3");
-                        idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer);
+                        idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer,supernova_list);
                     }   
                 }
                 wt = gameState.getWorld().getCurrentTick();
@@ -339,7 +371,7 @@ public class BotService {
         return false;
     }
 
-    public void idle(List<GameObject> nearestTorpedos, List<GameObject> nearestGasCloud, List<GameObject> foodList, List<GameObject> superFoodList, List<GameObject> nearestPlayer){
+    public void idle(List<GameObject> nearestTorpedos, List<GameObject> nearestGasCloud, List<GameObject> foodList, List<GameObject> superFoodList, List<GameObject> nearestPlayer, List<GameObject> supernova_list){
         playerAction.action = PlayerActions.FORWARD;
         System.out.println("MASUK FUNC IDLE MODE");
         if(alrdFire && gameState.getWorld().getCurrentTick()>getTime && bot.getSize()>nearestPlayer.get(0).getSize())
