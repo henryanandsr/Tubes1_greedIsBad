@@ -216,11 +216,11 @@ public class BotService {
                                     
                                     else if (nearestGasCloud.size() != 0 && getDistanceBetween(nearestGasCloud.get(0), bot) < (bot.getSize()+nearestGasCloud.get(0).getSize()+60))
                                     {
-                                        playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+90) %360;
+                                        playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+135) %360;
                                     }
                                     else if (nearestAsteroid.size() != 0 && getDistanceBetween(nearestAsteroid.get(0), bot)<30+bot.getSize()+nearestAsteroid.get(0).getSize())
                                     {
-                                        playerAction.heading += 90 %360;
+                                        playerAction.heading += 135 %360;
                                     }
                                 }
                                 else{
@@ -355,11 +355,11 @@ public class BotService {
             {
                 if(nearestGasCloud.size() != 0 &&  getHeadingBetween(nearestGasCloud.get(0))>=270 || (getHeadingBetween(nearestGasCloud.get(0))>=90 && getHeadingBetween(nearestGasCloud.get(0))<=180))
                 {
-                    playerAction.heading = getHeadingBetween(nearestGasCloud.get(0))+90%360;
+                    playerAction.heading = getHeadingBetween(nearestGasCloud.get(0))+135%360;
                 }
                 else
                 {
-                    playerAction.heading = getHeadingBetween(nearestGasCloud.get(0))-90%360;
+                    playerAction.heading = getHeadingBetween(nearestGasCloud.get(0))-135%360;
                 }
             }
         }
@@ -370,7 +370,14 @@ public class BotService {
             if (getDistanceBetween(nearestGasCloud.get(0), bot)<=(1+bot.getSize()+nearestGasCloud.get(0).getSize())){
                 playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+180) %360;
             }else{
-                playerAction.heading = (getHeadingBetween(nearestGasCloud.get(0))+90) %360;
+                if(getHeadingBetween(nearestGasCloud.get(0))>=270 || (getHeadingBetween(nearestGasCloud.get(0))>=90 && getHeadingBetween(nearestGasCloud.get(0))<=180))
+                {
+                    playerAction.heading = getHeadingBetween(nearestGasCloud.get(0))+135%360;
+                }
+                else
+                {
+                    playerAction.heading = getHeadingBetween(nearestGasCloud.get(0))-135%360;
+                }
             }
         }
         else if (superFoodList.size() != 0 && foodList.size() != 0 &&  getDistanceBetween(superFoodList.get(0),bot)<getDistanceBetween(foodList.get(0), bot)){
