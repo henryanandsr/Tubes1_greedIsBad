@@ -23,6 +23,7 @@ public class BotService {
     int evadetick = 0; //turn off afterburner
     //Objek baru "worldCenter buat nandain titik di tengah2 dan supaya nggak keluar"
     Position centerPosition = new Position(0,0);
+    GameObject teleTarget;
     GameObject worldCenter = new GameObject(null, null, null, null, centerPosition, null,null,null,null,null,null);
     public BotService() {
         this.playerAction = new PlayerAction();
@@ -50,7 +51,7 @@ public class BotService {
 
         if (gameState.getWorld().getCurrentTick()!=null){
             if (gameState.getWorld().getCurrentTick()!=wt){
-                System.out.println(gameState.getWorld().getCurrentTick());
+                
                 playerAction.action = PlayerActions.FORWARD;
                 playerAction.heading = getHeadingBetween(worldCenter);
                 if (!gameState.getGameObjects().isEmpty()){
@@ -81,6 +82,11 @@ public class BotService {
                         .sorted(Comparator
                                 .comparing(item -> getDistanceBetween(bot,item)))
                             .collect(Collectors.toList());
+                    // var nearestTorpedos = gameState.getGameObjects()
+                    //     .stream().filter(item -> item.getGameObjectType() == ObjectTypes.TORPEDO_SALVO)
+                    //     .sorted(Comparator
+                    //             .comparing(item -> getDistanceBetween(bot,item)))
+                    //         .collect(Collectors.toList());
                     var nearestTorpedos = gameState.getGameObjects()
                         .stream().filter(item -> item.getGameObjectType() == ObjectTypes.TORPEDO_SALVO &&  (Math.abs(getHeadingBetween(item) - item.currentHeading + 180) +360 % 360)  < 60)
                         .sorted(Comparator
@@ -88,12 +94,44 @@ public class BotService {
                             .collect(Collectors.toList());
                     GameObject scanMusuh = nearestPlayer.get(0); //musuh terdekat kita (untuk menentukan attack/defense)
                     boolean Terkepung = terkepung(nearestPlayer, bot, scanMusuh);
+                    int curRad = gameState.getWorld().getRadius();
+                    System.out.println("\n");
+                    System.out.println("---------------------------------------------------------");
+                    System.out.println("Torpedo Count : " + bot.getTorpedoSalvo());
+                    System.out.println("Shield Count : " + bot.shield);
+                    System.out.println("Teleport Count : " + bot.teleport);
+                    System.out.println("Current Radius : " + curRad);
+                    System.out.println("Current Size : " + bot.getSize());
+                    System.out.println("Current Tick : " + (gameState.getWorld().getCurrentTick()));
+                    System.out.println("---------------------------------------------------------");
+                    System.out.println("\n");
 
-                    if (getDistanceBetween(bot, nearestPlayer.get(0)) < (4*bot.getSize()+nearestPlayer.get(0).getSize())){
+                    if (gameState.getWorld().getCurrentTick() - ctick > 20) //penanda supaya nyalain shield biar ngga terus2an nembak shield
+                    {
+                        valid = true;
+                    }
+                    if (getDistanceBetween(bot, nearestPlayer.get(0)) < (0.2*curRad+bot.getSize()+nearestPlayer.get(0).getSize())){
                         System.out.println("COMBAT");
-                        if(alrdFire && gameState.getWorld().getCurrentTick()>getTime)
+                        if(alrdFire && gameState.getWorld().getCurrentTick()>getTime && teleTarget != null)
                         {
-                            // tempTele = tempListTele.get(0);
+                            if (bot.getSize()>teleTarget.getSize())
+                            {    
+                                playerAction.action = PlayerActions.TELEPORT;
+                                System.out.println("tele");
+                                alrdFire = false;
+                                fireTele = true;
+                                teleTarget = null;
+                            }
+                            else
+                            {
+                                System.out.println("cancel tele");
+                                alrdFire = false;
+                                fireTele = true;
+                                teleTarget = null;
+                            }
+                        }
+                        else if (alrdFire && gameState.getWorld().getCurrentTick()>getTime)
+                        {
                             playerAction.action = PlayerActions.TELEPORT;
                             System.out.println("tele");
                             alrdFire = false;
@@ -112,35 +150,37 @@ public class BotService {
                             if (Terkepung)
                             {
                                 System.out.println("Terkepung!");
-                                if (bot.fireTeleport > 0 && fireTele){
+                                if (bot.fireTeleport > 0 && fireTele && bot.getSize() > 30){
                                     System.out.println("Firing teleport");
                                     playerAction.heading = getHeadingBetween(worldCenter);
                                     playerAction.action = PlayerActions.FIRETELEPORT;           //terkepung dan teleport maneuver
                                     alrdFire = true;
                                     fireTele = false;
+
                                     getTime = getDistanceBetween(bot, worldCenter)/20 + gameState.getWorld().getCurrentTick();
-                                } else {
+                                } else if (bot.getSize()>26 && bot.torpedoSalvo > 0){
                                     System.out.println("GA PUNYA TELEPORT, TEMBAAK");
                                     playerAction.heading = getHeadingBetween(scanMusuh);
                                     playerAction.action = PlayerActions.FIRETORPEDOES;
+                                }else{
+                                    int heading1 = getHeadingBetween(nearestPlayer.get(0));
+                                    int heading2 = getHeadingBetween(nearestPlayer.get(1));
+                                    int tempHeading1 = Math.abs(heading1-heading2);
+                                    int tempHeading2 = 360-tempHeading1;
+                                    int refHeading = Math.min(tempHeading1, tempHeading2) < 180? tempHeading1 : tempHeading2;
+                                    playerAction.heading = (Math.max(tempHeading1, tempHeading2)/2 + refHeading)%360;
                                 }
                             } 
-                            else if (nearestTorpedos.size() != 0){
+                            else if (nearestTorpedos.size() != 0 && valid){
                                 System.out.println("Torpedo Detected");
-                                if (bot.getSize()>25 &&nearestTorpedos.size()!=0&& getDistanceBetween(nearestTorpedos.get(0), bot) < 65+bot.getSize() && bot.shield > 0)
+                                if (bot.getSize()>25 && getDistanceBetween(nearestTorpedos.get(0), bot) < 65+bot.getSize() && bot.shield > 0)
                                 {
                                     System.out.println("Able to shield");
-                                    if (gameState.getWorld().getCurrentTick() - ctick > 20) //penanda supaya nyalain shield biar ngga terus2an nembak shield
-                                    {
-                                        valid = true;
-                                    }
-                                    if (valid)
-                                    {
-                                        playerAction.action = PlayerActions.ACTIVATESHIELD;
-                                        System.out.println("Shield Engaged!");
-                                        ctick = gameState.getWorld().getCurrentTick();
-                                        valid = false;
-                                    }
+                                    playerAction.action = PlayerActions.ACTIVATESHIELD;
+                                    System.out.println("Shield Engaged!");
+                                    ctick = gameState.getWorld().getCurrentTick();
+                                    valid = false;
+        
                                 } else if (bot.getSize() >=15 && bot.getSize() <= 25 && bot.fireTeleport == 0){
                                         System.out.println("Evasive maneuvers!");
                                         int temp1 = getHeadingBetween(nearestTorpedos.get(0)) - getHeadingBetween(nearestTorpedos.get(1));
@@ -159,7 +199,7 @@ public class BotService {
                             } 
                             else if (scanMusuh != null && scanMusuh.getSize() > bot.getSize()){
                                 System.out.println("HES BIGGER");
-                                if (bot.torpedoSalvo > 0){
+                                if (bot.torpedoSalvo > 0 && bot.getSize()>26){
                                     System.out.println("Enemy is bigger, shoot anyway");
                                     playerAction.heading = getHeadingBetween(scanMusuh);
                                     playerAction.action = PlayerActions.FIRETORPEDOES;
@@ -225,7 +265,7 @@ public class BotService {
                                 }
                                 else{
                                     System.out.println("MASUK IDLE MODE4");
-                                    idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);
+                                    idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer);
                                 } 
                             } 
                             else if (scanMusuh != null && scanMusuh.getSize()<=bot.getSize())
@@ -235,9 +275,10 @@ public class BotService {
                                 {
                                     playerAction.heading = getHeadingBetween(nearestPlayer.get(0));
                                     playerAction.action = PlayerActions.FIRETELEPORT;
+                                    teleTarget = nearestPlayer.get(0);
                                     alrdFire = true;
                                     fireTele = false;
-                                    getTime = (getDistanceBetween(nearestPlayer.get(0), bot)-bot.getSize() - nearestPlayer.get(0).getSize() + 0.3*bot.getSize())/20 + gameState.getWorld().getCurrentTick();
+                                    getTime = (getDistanceBetween(nearestPlayer.get(0), bot)-bot.getSize() - nearestPlayer.get(0).getSize() + 20)/20 + gameState.getWorld().getCurrentTick();
                                     System.out.println("fire tele");
                                 }
                                 else if (bot.torpedoSalvo > 0 && bot.getSize()>26 && scanMusuh != null){
@@ -252,17 +293,17 @@ public class BotService {
                             }else
                             {
                             System.out.println("MASUK IDLE MODE1");
-                            idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);
+                            idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer);
                             }
                         }
                         else{
                             System.out.println("MASUK IDLE MODE2");
-                            idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);
+                            idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer);
                         }          
                     } 
                     else{
                         System.out.println("MASUK IDLE MODE3");
-                        idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList);
+                        idle(nearestTorpedos, nearestGasCloud, foodList, superFoodList, nearestPlayer);
                     }   
                 }
                 wt = gameState.getWorld().getCurrentTick();
@@ -298,14 +339,20 @@ public class BotService {
         return false;
     }
 
-    public void idle(List<GameObject> nearestTorpedos, List<GameObject> nearestGasCloud, List<GameObject> foodList, List<GameObject> superFoodList){
+    public void idle(List<GameObject> nearestTorpedos, List<GameObject> nearestGasCloud, List<GameObject> foodList, List<GameObject> superFoodList, List<GameObject> nearestPlayer){
         playerAction.action = PlayerActions.FORWARD;
         System.out.println("MASUK FUNC IDLE MODE");
-        if(alrdFire && gameState.getWorld().getCurrentTick()>getTime)
+        if(alrdFire && gameState.getWorld().getCurrentTick()>getTime && bot.getSize()>nearestPlayer.get(0).getSize())
         {
             // tempTele = tempListTele.get(0);
             playerAction.action = PlayerActions.TELEPORT;
             System.out.println("tele");
+            alrdFire = false;
+            fireTele = true;
+        }
+        else if (alrdFire && gameState.getWorld().getCurrentTick()>getTime)
+        {
+            System.out.println("cancel tele");
             alrdFire = false;
             fireTele = true;
         }
@@ -315,29 +362,30 @@ public class BotService {
             playerAction.action = PlayerActions.STOPAFTERBURNER;
             evade = false;
         }
-        else if (nearestTorpedos.size() != 0){
-            System.out.println("MASUK SHIELD IDLE MODE");
-            if (nearestTorpedos.size() != 0 && getDistanceBetween(nearestTorpedos.get(0), bot) < (85+bot.getSize())){
-                System.out.println("TORPEDOS COMING");
-                if (bot.getSize()>26){
-                    if (gameState.getWorld().getCurrentTick() - ctick > 20){
-                        valid = true;
-                    }
-                    if (valid && bot.shield > 0){
-                        playerAction.action = PlayerActions.ACTIVATESHIELD;
-                        playerAction.heading = getHeadingBetween(worldCenter);
-                        System.out.println("SHIELDDDD");
-                        ctick = gameState.getWorld().getCurrentTick();
-                        valid = false;
-                    }else{
-                        playerAction.action = PlayerActions.STARTAFTERBURNER;
-                        evade = true;
-                        evadetick = gameState.getWorld().getCurrentTick();
-                        playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + 450 % 360;    
-                    }
-                }else{
-                    playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + 450 % 360;
-                }
+        else if (nearestTorpedos.size() != 0 && valid){
+            System.out.println("Torpedo Detected");
+            if (bot.getSize()>25 && getDistanceBetween(nearestTorpedos.get(0), bot) < 65+bot.getSize() && bot.shield > 0)
+            {
+                System.out.println("Able to shield");
+                playerAction.action = PlayerActions.ACTIVATESHIELD;
+                System.out.println("Shield Engaged!");
+                ctick = gameState.getWorld().getCurrentTick();
+                valid = false;
+
+            } else if (bot.getSize() >=15 && bot.getSize() <= 25 && bot.fireTeleport == 0){
+                    System.out.println("Evasive maneuvers!");
+                    int temp1 = getHeadingBetween(nearestTorpedos.get(0)) - getHeadingBetween(nearestTorpedos.get(1));
+                    playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + (Math.max(Math.abs(temp1),Math.abs(360-temp1))/2);
+                    playerAction.action = PlayerActions.STARTAFTERBURNER;
+                    evadetick = gameState.getWorld().getCurrentTick();
+                    evade = true;
+            }else if(nearestTorpedos.size()>1){
+                System.out.println("Evasive maneuvers! -Tanpa afterburner");
+                int temp1 = getHeadingBetween(nearestTorpedos.get(0)) - getHeadingBetween(nearestTorpedos.get(1));
+                playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + (Math.max(Math.abs(temp1),Math.abs(360-temp1))/2);     
+            }else{
+                System.out.println("Evasive maneuvers! -Tanpa afterburner 2");
+                playerAction.heading = getHeadingBetween(nearestTorpedos.get(0)) + 90;
             }
         }
         else if(nearestGasCloud.size() != 0 &&  getDistanceBetween(worldCenter, bot)+2.5*bot.getSize()>gameState.world.getRadius() && getDistanceBetween(nearestGasCloud.get(0), bot) < (80+bot.getSize()+nearestGasCloud.get(0).getSize()))
